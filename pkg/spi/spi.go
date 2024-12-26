@@ -16,7 +16,7 @@ type SPI struct {
 
 const (
 	spiSpeed    = physic.MegaHertz * 1
-	spiMode     = spi.Mode3
+	spiMode     = spi.Mode0 // CPHL=0, CPOL=0
 	bitsPerWord = 8
 )
 
