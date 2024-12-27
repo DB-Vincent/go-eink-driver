@@ -1,6 +1,6 @@
 module github.com/DB-Vincent/go-eink-driver
 
-go 1.23.0
+go 1.23
 
 require (
 	periph.io/x/conn/v3 v3.7.1

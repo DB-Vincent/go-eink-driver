@@ -1,4 +1,4 @@
-package examples
+package main
 
 import (
 	"fmt"
@@ -18,13 +18,13 @@ func main() {
 	display := display.New(spi)
 	defer spi.Close()
 
-	fmt.Println("Initializing display...")
+	fmt.Println("Initializing display")
 	display.Init()
 
-	fmt.Println("Clearing display...")
+	fmt.Println("Clearing display")
 	display.Clear(0xFF)
 
-	fmt.Println("Done. Sleeping in 5 seconds...")
+	fmt.Println("Going back to sleep in 5 seconds...")
 	time.Sleep(5 * time.Second)
 	display.Sleep()
 }
