@@ -118,3 +118,11 @@ func (d *Display) Sleep() {
 	d.Spi.SendByte(0x01)
 	time.Sleep(2000 * time.Millisecond)
 }
+
+// DrawDot draws a dot on the screen at the given X & Y coordinate
+func (d *Display) DrawDot(x, y int, color byte) {
+	d.SetCursor(x, y)
+	d.Spi.SendCommand(0x24) // Write RAM
+	d.Spi.SendByte(color)
+	d.TurnDisplayOn()
+}

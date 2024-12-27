@@ -6,6 +6,7 @@ import (
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/display"
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
+	"github.com/DB-Vincent/go-eink-driver/pkg/utils"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 	display.Init()
 
 	fmt.Println("Clearing display")
-	display.Clear(0xFF)
+	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Going back to sleep in 5 seconds...")
 	time.Sleep(5 * time.Second)
