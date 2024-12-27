@@ -3,26 +3,26 @@ package utils
 import (
 	"image"
 	"image/color"
+	"image/draw"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
 )
 
-func Text(label string) *image.RGBA {
-	// Create image with correct bounds
-	img := image.NewRGBA(image.Rect(0, 0, 200, 50)) // Adjust bounds as needed
+// Text creates an image.Image containing the specified text
+func Text(s string) image.Image {
+	img := image.NewRGBA(image.Rect(0, 0, 7*len(s)+55, 25))
+	draw.Draw(img, img.Bounds(), &image.Uniform{color.White}, image.Point{}, draw.Src)
 
-	// Set starting point for text
-	point := fixed.Point26_6{X: fixed.I(10), Y: fixed.I(20)} // Adjust coordinates as needed
-
+	point := fixed.Point26_6{X: fixed.I(0), Y: fixed.I(10)}
 	d := &font.Drawer{
 		Dst:  img,
 		Src:  image.NewUniform(color.Black),
 		Face: basicfont.Face7x13,
 		Dot:  point,
 	}
-	d.DrawString(label)
+	d.DrawString(s)
 
 	return img
 }
