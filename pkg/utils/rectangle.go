@@ -5,7 +5,7 @@ import (
 	"image/color"
 )
 
-func Rectangle(x, y, width, height int) *image.RGBA {
+func Rectangle(width, height int) *image.RGBA {
 	// Create image with correct bounds
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
