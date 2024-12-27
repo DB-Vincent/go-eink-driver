@@ -1,6 +1,8 @@
 package display
 
 import (
+	"image"
+	"image/color"
 	"time"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
@@ -119,10 +121,16 @@ func (d *Display) Sleep() {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-// DrawDot draws a dot on the screen at the given X & Y coordinate
-func (d *Display) DrawDot(x, y int, color byte) {
-	d.SetCursor(x, y)
-	d.Spi.SendCommand(0x24) // Write RAM
-	d.Spi.SendByte(color)
+// DrawImage draws an image on the display
+func (d *Display) DrawImage(img image.Image) {
+	bounds := img.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			c := color.GrayModel.Convert(img.At(x, y)).(color.Gray)
+			d.SetCursor(x, y)
+			d.Spi.SendCommand(0x24) // Write RAM
+			d.Spi.SendByte(c.Y)
+		}
+	}
 	d.TurnDisplayOn()
 }
