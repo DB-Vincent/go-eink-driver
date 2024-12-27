@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"time"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/display"
@@ -27,7 +26,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	dot := image.Image(utils.Rectangle(50, 30, 150, 70))
+	dot := utils.Rectangle(50, 250)
 	display.DrawImage(dot)
 
 	fmt.Println("Going back to sleep in 5 seconds...")

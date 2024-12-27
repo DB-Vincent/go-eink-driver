@@ -2,7 +2,6 @@ package display
 
 import (
 	"image"
-	"image/color"
 	"time"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
@@ -121,16 +120,47 @@ func (d *Display) Sleep() {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-// DrawImage draws an image on the display
-func (d *Display) DrawImage(img image.Image) {
-	bounds := img.Bounds()
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			c := color.GrayModel.Convert(img.At(x, y)).(color.Gray)
-			d.SetCursor(x, y)
-			d.Spi.SendCommand(0x24) // Write RAM
-			d.Spi.SendByte(c.Y)
+func (d *Display) DrawImage(image image.Image) {
+	bounds := image.Bounds()
+	width := bounds.Dx()
+	height := bounds.Dy()
+
+	// Set addressing mode
+	d.Spi.SendCommand(0x11) // Data entry mode
+	d.Spi.SendByte(0x03)    // X/Y increment
+
+	// Set RAM address bounds
+	d.Spi.SendCommand(0x44)                // X start/end
+	d.Spi.SendByte(0x00)                   // Start
+	d.Spi.SendByte(uint8((width - 1) / 8)) // End
+
+	d.Spi.SendCommand(0x45)           // Y start/end
+	d.Spi.SendByte(0x00)              // Start
+	d.Spi.SendByte(uint8(height - 1)) // End
+
+	// Set RAM address start
+	d.Spi.SendCommand(0x4E) // Set RAM X
+	d.Spi.SendByte(0x00)
+	d.Spi.SendCommand(0x4F) // Set RAM Y
+	d.Spi.SendByte(0x00)
+
+	// Write data
+	d.Spi.SendCommand(0x24) // Write RAM
+
+	// Transfer image data byte by byte
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x += 8 {
+			data := byte(0)
+			// Pack 8 pixels into one byte
+			for bit := 0; bit < 8; bit++ {
+				if x+bit < width {
+					c := image.At(x+bit, y)
+					if r, _, _, _ := c.RGBA(); r > 0 {
+						data |= 1 << uint(7-bit)
+					}
+				}
+			}
+			d.Spi.SendByte(data)
 		}
 	}
-	d.TurnDisplayOn()
 }
