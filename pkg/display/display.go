@@ -51,12 +51,11 @@ func (d *Display) SetWindow(xStart, yStart, xEnd, yEnd int) {
 
 // SetCursor sets the cursor position
 func (d *Display) SetCursor(x, y int) {
-	d.Spi.SendCommand(0x4E) // SET_RAM_X_ADDRESS_COUNTER
-	d.Spi.SendByte(byte(x & 0xFF))
-
-	d.Spi.SendCommand(0x4F) // SET_RAM_Y_ADDRESS_COUNTER
-	d.Spi.SendByte(byte(y & 0xFF))
-	d.Spi.SendByte(byte((y >> 8) & 0xFF))
+	d.Spi.SendCommand(0x4E) // Set RAM X address counter
+	d.Spi.SendByte(byte(x / 8))
+	d.Spi.SendCommand(0x4F) // Set RAM Y address counter
+	d.Spi.SendByte(byte(y))
+	d.Spi.ReadBusy() // Wait until the display is ready
 }
 
 // Init initializes the display
@@ -120,41 +119,38 @@ func (d *Display) Sleep() {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (d *Display) DrawImage(image image.Image) {
+func (d *Display) DrawImage(image image.Image, x, y int) {
 	bounds := image.Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
+
+	// Set cursor to starting coordinates
+	d.SetCursor(x, y)
 
 	// Set addressing mode
 	d.Spi.SendCommand(0x11) // Data entry mode
 	d.Spi.SendByte(0x03)    // X/Y increment
 
 	// Set RAM address bounds
-	d.Spi.SendCommand(0x44)                // X start/end
-	d.Spi.SendByte(0x00)                   // Start
-	d.Spi.SendByte(uint8((width - 1) / 8)) // End
+	d.Spi.SendCommand(0x44)                   // X start/end
+	d.Spi.SendByte(byte(x / 8))               // Start
+	d.Spi.SendByte(byte((x + width - 1) / 8)) // End
 
-	d.Spi.SendCommand(0x45)           // Y start/end
-	d.Spi.SendByte(0x00)              // Start
-	d.Spi.SendByte(uint8(height - 1)) // End
-
-	// Set RAM address start
-	d.Spi.SendCommand(0x4E) // Set RAM X
-	d.Spi.SendByte(0x00)
-	d.Spi.SendCommand(0x4F) // Set RAM Y
-	d.Spi.SendByte(0x00)
+	d.Spi.SendCommand(0x45)              // Y start/end
+	d.Spi.SendByte(byte(y))              // Start
+	d.Spi.SendByte(byte(y + height - 1)) // End
 
 	// Write data
 	d.Spi.SendCommand(0x24) // Write RAM
 
 	// Transfer image data byte by byte
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x += 8 {
+	for py := 0; py < height; py++ {
+		for px := 0; px < width; px += 8 {
 			data := byte(0)
 			// Pack 8 pixels into one byte
 			for bit := 0; bit < 8; bit++ {
-				if x+bit < width {
-					c := image.At(x+bit, y)
+				if px+bit < width {
+					c := image.At(px+bit, py)
 					if r, _, _, _ := c.RGBA(); r > 0 {
 						data |= 1 << uint(7-bit)
 					}
