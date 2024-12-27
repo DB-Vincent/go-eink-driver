@@ -151,7 +151,8 @@ func (d *Display) DrawImage(image image.Image, x, y int) {
 			for bit := 0; bit < 8; bit++ {
 				if px+bit < width {
 					c := image.At(px+bit, py)
-					if r, _, _, _ := c.RGBA(); r > 0 {
+					r, g, b, _ := c.RGBA()
+					if r == 0 && g == 0 && b == 0 {
 						data |= 1 << uint(7-bit)
 					}
 				}

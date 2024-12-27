@@ -11,9 +11,10 @@ import (
 
 func Text(label string) *image.RGBA {
 	// Create image with correct bounds
-	img := image.NewRGBA(image.Rect(0, 0, 122, 255))
+	img := image.NewRGBA(image.Rect(0, 0, 200, 50)) // Adjust bounds as needed
 
-	point := fixed.Point26_6{X: 0, Y: 0}
+	// Set starting point for text
+	point := fixed.Point26_6{X: fixed.I(10), Y: fixed.I(20)} // Adjust coordinates as needed
 
 	d := &font.Drawer{
 		Dst:  img,

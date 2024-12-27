@@ -24,7 +24,7 @@ func main() {
 	fmt.Println("Clearing display")
 	display.Clear(utils.ColorWhite)
 
-	fmt.Println("Drawing a rectangle")
+	fmt.Println("Drawing text")
 	text := utils.Text("Hello, World!")
 	display.DrawImage(text, 0, 0)
 
