@@ -24,5 +24,13 @@ func Text(s string) image.Image {
 	}
 	d.DrawString(s)
 
+	rotatedImg := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dy(), img.Bounds().Dx()))
+	for x := 0; x < img.Bounds().Dx(); x++ {
+		for y := 0; y < img.Bounds().Dy(); y++ {
+			rotatedImg.Set(y, img.Bounds().Dx()-1-x, img.At(x, y))
+		}
+	}
+	img = rotatedImg
+
 	return img
 }
