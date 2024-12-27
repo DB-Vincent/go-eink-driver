@@ -26,8 +26,8 @@ func main() {
 	fmt.Println("Clearing display")
 	display.Clear(utils.ColorWhite)
 
-	fmt.Println("Drawing a dot")
-	dot := image.Image(utils.Dot(122, 250))
+	fmt.Println("Drawing a rectangle")
+	dot := image.Image(utils.Rectangle(50, 30, 150, 70))
 	display.DrawImage(dot)
 
 	fmt.Println("Going back to sleep in 5 seconds...")
