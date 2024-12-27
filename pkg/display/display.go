@@ -159,6 +159,4 @@ func (d *Display) DrawImage(image image.Image, x, y int) {
 			d.Spi.SendByte(data)
 		}
 	}
-
-	d.Refresh()
 }
