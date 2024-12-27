@@ -26,8 +26,12 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	dot := utils.Rectangle(100, 40) // Create rectangle at (0,0) with width 100 and height 40
-	display.DrawImage(dot, 50, 30)  // Draw rectangle at (50, 30)
+	rect := utils.Rectangle(50, 50)
+	display.DrawImage(rect, 125, 0)
+	display.DrawImage(rect, 85, 15)
+	display.DrawImage(rect, 165, 15)
+
+	display.Refresh()
 
 	fmt.Println("Going back to sleep in 5 seconds...")
 	time.Sleep(5 * time.Second)
