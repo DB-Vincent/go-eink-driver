@@ -91,8 +91,8 @@ func (d *Display) Init() {
 	d.Spi.ReadBusy()
 }
 
-// TurnDisplayOn turns on normal display refresh
-func (d *Display) TurnDisplayOn() {
+// Refresh turns on normal display refresh
+func (d *Display) Refresh() {
 	d.Spi.SendCommand(0x22) // Display Update Control
 	d.Spi.SendByte(0xF7)
 	d.Spi.SendCommand(0x20) // Activate Display Update Sequence
@@ -110,7 +110,7 @@ func (d *Display) Clear(color byte) {
 	for i := 0; i < d.Height*lineWidth; i++ {
 		d.Spi.SendByte(color)
 	}
-	d.TurnDisplayOn()
+	d.Refresh()
 }
 
 // Sleep puts the display in sleep mode
@@ -163,4 +163,6 @@ func (d *Display) DrawImage(image image.Image) {
 			d.Spi.SendByte(data)
 		}
 	}
+
+	d.Refresh()
 }
