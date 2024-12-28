@@ -144,7 +144,7 @@ func (d *Display) DrawCanvas() {
 			for bit := 0; bit < 8; bit++ {
 				if x+bit < d.Width {
 					// Get pixel from Canvas (white is 255, black is 0)
-					if d.Canvas.GrayAt(x+bit, y).Y == 0 {
+					if d.Canvas.GrayAt(x+bit, y).Y > 0 {
 						data |= 1 << uint(7-bit)
 					}
 				}
