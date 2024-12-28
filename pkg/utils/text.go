@@ -13,7 +13,7 @@ import (
 func Text(img *image.Gray, x, y int, label string) {
 	point := fixed.Point26_6{
 		X: fixed.I(x),
-		Y: fixed.I(y),
+		Y: fixed.I(y + 13),
 	}
 	d := &font.Drawer{
 		Dst:  img,

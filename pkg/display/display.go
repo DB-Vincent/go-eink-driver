@@ -25,7 +25,7 @@ func New(spi *spi.SPI) *Display {
 	d.Width = 122
 	d.Height = 250
 
-	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))                                          // Create new canvas
+	d.Canvas = image.NewGray(image.Rect(0, 0, d.Height, d.Width))                                          // Create new canvas
 	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src) // Fill canvas with white
 
 	d.Spi = spi
