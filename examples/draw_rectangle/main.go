@@ -25,11 +25,8 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	rect := utils.Rectangle(50, 50)
-	display.DrawImage(rect, 16, 26)
-	display.DrawImage(rect, 36, 102)
-	display.DrawImage(rect, 56, 178)
+	utils.Rectangle(display.Canvas, 10, 10, 50, 50)
+	display.DrawCanvas()
 
-	display.Refresh()
 	display.Sleep()
 }

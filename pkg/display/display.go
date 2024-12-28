@@ -2,6 +2,8 @@ package display
 
 import (
 	"image"
+	"image/color"
+	"image/draw"
 	"time"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
@@ -10,6 +12,8 @@ import (
 type Display struct {
 	Width  int
 	Height int
+
+	Canvas *image.Gray
 
 	Spi *spi.SPI
 }
@@ -20,6 +24,9 @@ func New(spi *spi.SPI) *Display {
 
 	d.Width = 122
 	d.Height = 250
+
+	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))                                          // Create new canvas
+	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src) // Fill canvas with white
 
 	d.Spi = spi
 
@@ -119,39 +126,25 @@ func (d *Display) Sleep() {
 	time.Sleep(2000 * time.Millisecond)
 }
 
-func (d *Display) DrawImage(image image.Image, x, y int) {
-	bounds := image.Bounds()
-	width := bounds.Dx()
-	height := bounds.Dy()
+func (d *Display) DrawCanvas() {
+	// Set cursor to start position
+	d.SetCursor(0, 0)
 
-	// Set cursor to starting coordinates
-	d.SetCursor(x, y)
-
-	// Set addressing mode
-	d.Spi.SendCommand(0x11) // Data entry mode
-	d.Spi.SendByte(0x03)    // X/Y increment
-
-	// Set RAM address bounds
-	d.Spi.SendCommand(0x44)                   // X start/end
-	d.Spi.SendByte(byte(x / 8))               // Start
-	d.Spi.SendByte(byte((x + width - 1) / 8)) // End
-
-	d.Spi.SendCommand(0x45)              // Y start/end
-	d.Spi.SendByte(byte(y))              // Start
-	d.Spi.SendByte(byte(y + height - 1)) // End
+	// Set RAM address bounds to full display
+	d.SetWindow(0, 0, d.Width-1, d.Height-1)
 
 	// Write data
 	d.Spi.SendCommand(0x24) // Write RAM
 
 	// Transfer image data byte by byte
-	for py := 0; py < height; py++ {
-		for px := 0; px < width; px += 8 {
+	for y := 0; y < d.Height; y++ {
+		for x := 0; x < d.Width; x += 8 {
 			data := byte(0)
 			// Pack 8 pixels into one byte
 			for bit := 0; bit < 8; bit++ {
-				if px+bit < width {
-					c := image.At(px+bit, py)
-					if r, _, _, _ := c.RGBA(); r > 0 {
+				if x+bit < d.Width {
+					// Get pixel from Canvas (white is 255, black is 0)
+					if d.Canvas.GrayAt(x+bit, y).Y == 0 {
 						data |= 1 << uint(7-bit)
 					}
 				}
@@ -159,4 +152,7 @@ func (d *Display) DrawImage(image image.Image, x, y int) {
 			d.Spi.SendByte(data)
 		}
 	}
+
+	// Refresh display
+	d.Refresh()
 }
