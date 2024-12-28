@@ -25,7 +25,7 @@ func New(spi *spi.SPI) *Display {
 	d.Width = 122
 	d.Height = 250
 
-	d.Canvas = image.NewGray(image.Rect(0, 0, d.Height, d.Width))                                          // Create new canvas
+	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))                                          // Create new canvas
 	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src) // Fill canvas with white
 
 	d.Spi = spi
@@ -126,6 +126,7 @@ func (d *Display) Sleep() {
 	time.Sleep(2000 * time.Millisecond)
 }
 
+// DrawCanvas draws the canvas to the display
 func (d *Display) DrawCanvas() {
 	// Set cursor to start position
 	d.SetCursor(0, 0)
@@ -133,26 +134,21 @@ func (d *Display) DrawCanvas() {
 	// Set RAM address bounds to full display
 	d.SetWindow(0, 0, d.Width-1, d.Height-1)
 
-	// Write data
-	d.Spi.SendCommand(0x24) // Write RAM
+	bytesPerRow := (d.Width + 7) / 8
+	buffer := make([]byte, bytesPerRow*d.Height)
 
-	// Transfer image data byte by byte
 	for y := 0; y < d.Height; y++ {
-		for x := 0; x < d.Width; x += 8 {
-			data := byte(0)
-			// Pack 8 pixels into one byte
-			for bit := 0; bit < 8; bit++ {
-				if x+bit < d.Width {
-					// Get pixel from Canvas (white is 255, black is 0)
-					if d.Canvas.GrayAt(x+bit, y).Y > 0 {
-						data |= 1 << uint(7-bit)
-					}
-				}
+		for x := 0; x < d.Width; x++ {
+			if d.Canvas.GrayAt(x, y).Y > 128 {
+				// Set the corresponding bit for black pixel
+				buffer[y*bytesPerRow+x/8] |= 0x80 >> (x % 8)
 			}
-			d.Spi.SendByte(data)
 		}
 	}
 
-	// Refresh display
+	// Write data
+	d.Spi.SendCommand(0x24) // Write RAM
+	d.Spi.SendBytes(buffer)
+
 	d.Refresh()
 }
