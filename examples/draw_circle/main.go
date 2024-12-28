@@ -25,7 +25,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing text")
-	utils.Text(display.Canvas, 0, 0, "Hello, World!")
+	utils.Circle(display.Canvas, 40, 40, 30)
 
 	display.DrawCanvas()
 	display.Sleep()
