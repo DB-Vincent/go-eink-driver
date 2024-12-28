@@ -24,9 +24,9 @@ func main() {
 	fmt.Println("Clearing display")
 	display.Clear(utils.ColorWhite)
 
-	fmt.Println("Drawing a rectangle")
-	utils.Rectangle(display.Canvas, 30, 62, 61, 125)
-	display.DrawCanvas()
+	fmt.Println("Drawing text")
+	utils.Circle(display.Canvas, 40, 40, 30)
 
+	display.DrawCanvas()
 	display.Sleep()
 }

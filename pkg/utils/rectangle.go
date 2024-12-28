@@ -3,18 +3,12 @@ package utils
 import (
 	"image"
 	"image/color"
+	"image/draw"
 )
 
-func Rectangle(width, height int) *image.RGBA {
-	// Create image with correct bounds
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
-
-	// Fill rectangle
-	for py := 0; py < height; py++ {
-		for px := 0; px < width; px++ {
-			img.Set(px, py, color.Black)
-		}
-	}
+func Rectangle(img *image.Gray, x, y, width, height int) *image.Gray {
+	rectangle := image.Rect(x, y, x+width, y+height)
+	draw.Draw(img, rectangle, &image.Uniform{C: color.Gray{Y: 0}}, image.Point{}, draw.Src)
 
 	return img
 }
