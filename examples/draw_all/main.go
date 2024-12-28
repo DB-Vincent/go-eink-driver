@@ -27,7 +27,7 @@ func main() {
 	fmt.Println("Drawing a rectangle")
 	utils.Text(display.Canvas, 0, 0, "Hello, world!")
 	utils.Rectangle(display.Canvas, 0, 50, 50, 50)
-	utils.Circle(display.Canvas, 50, 150, 25)
+	utils.Circle(display.Canvas, 25, 150, 25)
 
 	display.DrawCanvas()
 	display.Sleep()
