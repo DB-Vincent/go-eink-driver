@@ -9,27 +9,38 @@ import (
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
 )
 
+const (
+	physicalWidth  = 122
+	physicalHeight = 250
+)
+
 type Display struct {
 	Width  int
 	Height int
 
-	Canvas *image.Gray
+	Canvas      *image.Gray
+	IsLandscape bool
 
 	Spi *spi.SPI
 }
 
 // New creates a new display
-func New(spi *spi.SPI) *Display {
+func New(spi *spi.SPI, landscape bool) *Display {
 	d := &Display{}
+	d.IsLandscape = landscape
 
-	d.Width = 122
-	d.Height = 250
+	// In landscape mode, swap width and height for the canvas
+	if landscape {
+		d.Width = physicalHeight
+		d.Height = physicalWidth
+	} else {
+		d.Width = physicalWidth
+		d.Height = physicalHeight
+	}
 
-	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))                                          // Create new canvas
-	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src) // Fill canvas with white
-
+	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))
+	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src)
 	d.Spi = spi
-
 	return d
 }
 
@@ -43,77 +54,87 @@ func (d *Display) Reset() {
 	time.Sleep(20 * time.Millisecond)
 }
 
-// SetWindow sets the display window
-func (d *Display) SetWindow(xStart, yStart, xEnd, yEnd int) {
-	d.Spi.SendCommand(0x44) // SET_RAM_X_ADDRESS_START_END_POSITION
-	d.Spi.SendByte(byte((xStart >> 3) & 0xFF))
-	d.Spi.SendByte(byte((xEnd >> 3) & 0xFF))
-
-	d.Spi.SendCommand(0x45) // SET_RAM_Y_ADDRESS_START_END_POSITION
-	d.Spi.SendByte(byte(yStart & 0xFF))
-	d.Spi.SendByte(byte((yStart >> 8) & 0xFF))
-	d.Spi.SendByte(byte(yEnd & 0xFF))
-	d.Spi.SendByte(byte((yEnd >> 8) & 0xFF))
-}
-
-// SetCursor sets the cursor position
-func (d *Display) SetCursor(x, y int) {
-	d.Spi.SendCommand(0x4E) // Set RAM X address counter
-	d.Spi.SendByte(byte(x / 8))
-	d.Spi.SendCommand(0x4F) // Set RAM Y address counter
-	d.Spi.SendByte(byte(y))
-	d.Spi.ReadBusy() // Wait until the display is ready
-}
-
 // Init initializes the display
 func (d *Display) Init() {
 	d.Reset()
 	d.Spi.ReadBusy()
-
 	d.Spi.SendCommand(0x12) // SWRESET
 	d.Spi.ReadBusy()
-
 	d.Spi.SendCommand(0x01) // Driver output control
 	d.Spi.SendByte(0xF9)
 	d.Spi.SendByte(0x00)
 	d.Spi.SendByte(0x00)
-
-	d.Spi.SendCommand(0x11) // Datad.try mode
+	d.Spi.SendCommand(0x11) // Data entry mode
 	d.Spi.SendByte(0x03)
-
-	d.SetWindow(0, 0, d.Width-1, d.Height-1)
-	d.SetCursor(0, 0)
-
+	d.Spi.SendCommand(0x44) // SET_RAM_X_ADDRESS_START_END_POSITION
+	d.Spi.SendByte(0x00)
+	d.Spi.SendByte(0x0F)
+	d.Spi.SendCommand(0x45) // SET_RAM_Y_ADDRESS_START_END_POSITION
+	d.Spi.SendByte(0x00)
+	d.Spi.SendByte(0x00)
+	d.Spi.SendByte(0xF9)
+	d.Spi.SendByte(0x00)
 	d.Spi.SendCommand(0x3C) // BorderWavefrom
 	d.Spi.SendByte(0x05)
-
 	d.Spi.SendCommand(0x21) // Display update control
 	d.Spi.SendByte(0x00)
 	d.Spi.SendByte(0x80)
-
 	d.Spi.SendCommand(0x18)
 	d.Spi.SendByte(0x80)
-
 	d.Spi.ReadBusy()
 }
 
-// Refresh turns on normal display refresh
+// DrawCanvas draws the canvas to the display
+func (d *Display) DrawCanvas() {
+	bytesPerRow := (physicalWidth + 7) / 8
+	buffer := make([]byte, bytesPerRow*physicalHeight)
+
+	// Fill buffer based on orientation
+	if d.IsLandscape {
+		// Rotate 90 degrees clockwise when filling buffer
+		for y := 0; y < physicalHeight; y++ {
+			for x := 0; x < physicalWidth; x++ {
+				canvasX := physicalHeight - 1 - y
+				canvasY := x
+
+				if d.Canvas.GrayAt(canvasX, canvasY).Y > 128 {
+					buffer[y*bytesPerRow+x/8] |= 0x80 >> (x % 8)
+				}
+			}
+		}
+	} else {
+		// Normal orientation
+		for y := 0; y < physicalHeight; y++ {
+			for x := 0; x < physicalWidth; x++ {
+				if d.Canvas.GrayAt(x, y).Y > 128 {
+					buffer[y*bytesPerRow+x/8] |= 0x80 >> (x % 8)
+				}
+			}
+		}
+	}
+
+	// Write to display
+	d.Spi.SendCommand(0x24) // Write RAM
+	d.Spi.SendBytes(buffer)
+	d.Refresh()
+}
+
+// Refresh turns on display update
 func (d *Display) Refresh() {
-	d.Spi.SendCommand(0x22) // Display Update Control
+	d.Spi.SendCommand(0x22)
 	d.Spi.SendByte(0xF7)
-	d.Spi.SendCommand(0x20) // Activate Display Update Sequence
+	d.Spi.SendCommand(0x20)
 	d.Spi.ReadBusy()
 }
 
 // Clear clears the display
 func (d *Display) Clear(color byte) {
-	lineWidth := d.Width / 8
-	if d.Width%8 != 0 {
+	lineWidth := physicalWidth / 8
+	if physicalWidth%8 != 0 {
 		lineWidth++
 	}
-
 	d.Spi.SendCommand(0x24)
-	for i := 0; i < d.Height*lineWidth; i++ {
+	for i := 0; i < physicalHeight*lineWidth; i++ {
 		d.Spi.SendByte(color)
 	}
 	d.Refresh()
@@ -121,34 +142,7 @@ func (d *Display) Clear(color byte) {
 
 // Sleep puts the display in sleep mode
 func (d *Display) Sleep() {
-	d.Spi.SendCommand(0x10) // Deep sleep mode
+	d.Spi.SendCommand(0x10)
 	d.Spi.SendByte(0x01)
 	time.Sleep(2000 * time.Millisecond)
-}
-
-// DrawCanvas draws the canvas to the display
-func (d *Display) DrawCanvas() {
-	// Set cursor to start position
-	d.SetCursor(0, 0)
-
-	// Set RAM address bounds to full display
-	d.SetWindow(0, 0, d.Width-1, d.Height-1)
-
-	bytesPerRow := (d.Width + 7) / 8
-	buffer := make([]byte, bytesPerRow*d.Height)
-
-	for y := 0; y < d.Height; y++ {
-		for x := 0; x < d.Width; x++ {
-			if d.Canvas.GrayAt(x, y).Y > 128 {
-				// Set the corresponding bit for black pixel
-				buffer[y*bytesPerRow+x/8] |= 0x80 >> (x % 8)
-			}
-		}
-	}
-
-	// Write data
-	d.Spi.SendCommand(0x24) // Write RAM
-	d.Spi.SendBytes(buffer)
-
-	d.Refresh()
 }

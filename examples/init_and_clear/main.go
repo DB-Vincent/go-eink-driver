@@ -16,7 +16,7 @@ func main() {
 		return
 	}
 
-	display := display.New(spi)
+	display := display.New(spi, true)
 	defer spi.Close()
 
 	fmt.Println("Initializing display")
