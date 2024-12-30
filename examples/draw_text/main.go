@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/display"
+	"github.com/DB-Vincent/go-eink-driver/pkg/graphics"
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
 	"github.com/DB-Vincent/go-eink-driver/pkg/utils"
 )
@@ -25,7 +26,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing text")
-	utils.Text(display.Canvas, 0, 0, "Hello, World!")
+	graphics.Text(display.Canvas, 0, 0, "Hello, World!")
 
 	display.DrawCanvas()
 	display.Sleep()

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/display"
+	"github.com/DB-Vincent/go-eink-driver/pkg/graphics"
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
 	"github.com/DB-Vincent/go-eink-driver/pkg/utils"
 )
@@ -25,7 +26,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	if err = utils.Image(display.Canvas, "./image.png"); err != nil {
+	if err = graphics.Image(display.Canvas, "./image.png"); err != nil {
 		fmt.Printf("%v", err)
 	}
 

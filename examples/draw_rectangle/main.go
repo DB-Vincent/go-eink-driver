@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DB-Vincent/go-eink-driver/pkg/display"
+	"github.com/DB-Vincent/go-eink-driver/pkg/graphics"
 	"github.com/DB-Vincent/go-eink-driver/pkg/spi"
 	"github.com/DB-Vincent/go-eink-driver/pkg/utils"
 )
@@ -25,7 +26,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	utils.Rectangle(display.Canvas, 30, 62, 61, 125)
+	graphics.Rectangle(display.Canvas, 30, 62, 61, 125)
 	display.DrawCanvas()
 
 	display.Sleep()
