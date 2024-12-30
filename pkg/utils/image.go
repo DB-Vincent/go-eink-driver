@@ -3,6 +3,7 @@ package utils
 import (
 	"image"
 	"image/draw"
+	_ "image/png"
 	"os"
 )
 
