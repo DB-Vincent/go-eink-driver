@@ -31,7 +31,7 @@ func main() {
 	}
 	graphics.Text(display.Canvas, 0, 0, "Hello, world!")
 	graphics.Rectangle(display.Canvas, 0, 50, 50, 50)
-	graphics.Circle(display.Canvas, 25, 150, 25)
+	graphics.Circle(display.Canvas, 200, 50, 25)
 
 	display.DrawCanvas()
 	display.Sleep()
