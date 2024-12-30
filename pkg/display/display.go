@@ -38,10 +38,15 @@ func New(spi *spi.SPI, landscape bool) *Display {
 		d.Height = physicalHeight
 	}
 
-	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))
-	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src)
+	d.ClearCanvas()
+
 	d.Spi = spi
 	return d
+}
+
+func (d *Display) ClearCanvas() {
+	d.Canvas = image.NewGray(image.Rect(0, 0, d.Width, d.Height))
+	draw.Draw(d.Canvas, d.Canvas.Bounds(), &image.Uniform{C: color.Gray{Y: 255}}, image.Point{}, draw.Src)
 }
 
 // Reset resets the display
