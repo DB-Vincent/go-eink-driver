@@ -26,7 +26,7 @@ func main() {
 	display.Clear(utils.ColorWhite)
 
 	fmt.Println("Drawing a rectangle")
-	if err = graphics.Image(display.Canvas, "./image.png"); err != nil {
+	if err = graphics.Image(display.Canvas, "./image.png", 0, 0); err != nil {
 		fmt.Printf("%v", err)
 	}
 

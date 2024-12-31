@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Image(canvas *image.Gray, path string) error {
+func Image(canvas *image.Gray, path string, x, y int) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -19,6 +19,6 @@ func Image(canvas *image.Gray, path string) error {
 		return err
 	}
 
-	draw.Draw(canvas, canvas.Bounds(), img, image.Point{}, draw.Over)
+	draw.Draw(canvas, canvas.Bounds(), img, image.Point{-x, -y}, draw.Over)
 	return nil
 }
